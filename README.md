@@ -1,12 +1,10 @@
-# i2i Academy - Computer Vision Assignment (Homework 1)
+# i2i Academy - Computer Vision Assignment
 
 This repository contains the complete implementation and theoretical answers for the i2i Academy Computer Vision homework. The goal of this assignment is to develop a real-time finger-counting application using OpenCV and MediaPipe.
 
 ---
 
-## Section 3.1.1: Theoretical Knowledge Answers
-
-Here are the answers to the three theoretical questions (constrained to a maximum of 5 sentences in total):
+## Theoretical Knowledge Answers
 
 1. **Computer Vision (CV)** is a field of artificial intelligence that enables computers to interpret and understand digital images or videos, with primary use cases including autonomous driving, medical image analysis, facial recognition, and industrial quality control.
 2. The key difference is that **image classification** assigns a single label to an entire image, whereas **object detection** identifies, locates, and draws bounding boxes around multiple individual objects within that image.
@@ -14,7 +12,7 @@ Here are the answers to the three theoretical questions (constrained to a maximu
 
 ---
 
-## Section 3.1.2: Practical Application Details
+## Practical Application Details
 
 The practical application is written in Python (`hand_tracking.py`). It is implemented using modern **Object-Oriented Design Patterns** to achieve high modularity and clean separation of concerns:
 
