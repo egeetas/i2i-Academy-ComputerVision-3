@@ -61,3 +61,12 @@ python hand_tracking.py
 - Hold up one or two hands in front of the camera.
 - The screen will display the detected landmarks, individual finger states (OPEN/CLOSED), and the total open finger count.
 - Press **`q`** inside the webcam video window to stop the program and release the camera.
+
+## Demo Video
+
+https://github.com/user-attachments/assets/3ba96159-c316-4836-adf3-367ef04eb8a8
+
+
+
+
+
