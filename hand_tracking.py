@@ -75,6 +75,7 @@ class Thumb(Finger):
         thumb_ip = landmarks[self.ip_idx]
         thumb_mcp = landmarks[self.mcp_idx]
         pinky_mcp = landmarks[self.pinky_mcp_idx]
+        index_mcp = landmarks[5]  # Index MCP joint (knuckle)
 
         # 1. Horizontal check based on hand orientation
         # Determine hand orientation (whether thumb is on the left or right side)
@@ -88,12 +89,23 @@ class Thumb(Finger):
             # (e.g., Left hand palm facing the camera).
             horizontal_open = thumb_tip.x > thumb_ip.x
 
-        # 2. Vertical check to handle thumbs-up posture (when x-coordinates align closely)
-        # If the thumb tip is higher than the IP joint (lower y-value), it's vertically open.
-        vertical_open = thumb_tip.y < thumb_ip.y
+        # 2. Distance-based check (highly robust for thumbs-up and rotation-invariant)
+        # Compare distance between Thumb Tip and Index MCP with Thumb IP and Index MCP.
+        # If the thumb is extended (open), the tip is further from the index base than the IP joint.
+        # If the thumb is folded (closed), the tip is tucked closer to the index base than the IP joint.
+        dist_tip_index = ((thumb_tip.x - index_mcp.x)**2 + 
+                          (thumb_tip.y - index_mcp.y)**2 + 
+                          (thumb_tip.z - index_mcp.z)**2)**0.5
+                          
+        dist_ip_index = ((thumb_ip.x - index_mcp.x)**2 + 
+                         (thumb_ip.y - index_mcp.y)**2 + 
+                         (thumb_ip.z - index_mcp.z)**2)**0.5
 
-        # The thumb is open if it is extended either horizontally or vertically
-        return horizontal_open or vertical_open
+        # We add a 1.02 multiplier tolerance to prevent noise when the thumb is relaxed/folded.
+        distance_open = dist_tip_index > (dist_ip_index * 1.02)
+
+        # The thumb is open if either the horizontal coordinate check OR the robust distance check is True
+        return horizontal_open or distance_open
 
 
 # ==========================================
