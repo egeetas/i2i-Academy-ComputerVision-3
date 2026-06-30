@@ -5,11 +5,20 @@ and MediaPipe, structured with software design patterns (Strategy, Factory,
 Facade, and Composition).
 """
 
+"""
+Requirements:
+    pip install opencv-python mediapipe
+
+Run:
+    python hand_tracking.py
+
+Press 'q' to quit the application.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 import time
 import cv2
-# pyrefly: ignore [missing-import]
 import mediapipe as mp
 
 
@@ -62,21 +71,29 @@ class Thumb(Finger):
         self.pinky_mcp_idx = pinky_mcp_idx
 
     def is_open(self, landmarks) -> bool:
-        thumb_tip_x = landmarks[self.tip_idx].x
-        thumb_ip_x = landmarks[self.ip_idx].x
-        thumb_mcp_x = landmarks[self.mcp_idx].x
-        pinky_mcp_x = landmarks[self.pinky_mcp_idx].x
+        thumb_tip = landmarks[self.tip_idx]
+        thumb_ip = landmarks[self.ip_idx]
+        thumb_mcp = landmarks[self.mcp_idx]
+        pinky_mcp = landmarks[self.pinky_mcp_idx]
 
+        # 1. Horizontal check based on hand orientation
         # Determine hand orientation (whether thumb is on the left or right side)
         # by comparing Pinky MCP x-coordinate with Thumb MCP x-coordinate.
-        if pinky_mcp_x > thumb_mcp_x:
+        if pinky_mcp.x > thumb_mcp.x:
             # Thumb is on the left side of the hand relative to the camera view
             # (e.g., Right hand palm facing the camera).
-            return thumb_tip_x < thumb_ip_x
+            horizontal_open = thumb_tip.x < thumb_ip.x
         else:
             # Thumb is on the right side of the hand relative to the camera view
             # (e.g., Left hand palm facing the camera).
-            return thumb_tip_x > thumb_ip_x
+            horizontal_open = thumb_tip.x > thumb_ip.x
+
+        # 2. Vertical check to handle thumbs-up posture (when x-coordinates align closely)
+        # If the thumb tip is higher than the IP joint (lower y-value), it's vertically open.
+        vertical_open = thumb_tip.y < thumb_ip.y
+
+        # The thumb is open if it is extended either horizontally or vertically
+        return horizontal_open or vertical_open
 
 
 # ==========================================
@@ -220,7 +237,23 @@ class FingerCounterApp:
             hand_states = {}
 
             if results.multi_hand_landmarks:
+                detected_wrists = []
                 for hand_landmarks in results.multi_hand_landmarks:
+                    wrist = hand_landmarks.landmark[0]
+                    # Check if this wrist is too close to any already processed wrist
+                    # (Distance threshold of 0.08 normalized coordinates is about 8% of screen)
+                    is_duplicate = False
+                    for prev_wrist in detected_wrists:
+                        dist = ((wrist.x - prev_wrist.x)**2 + (wrist.y - prev_wrist.y)**2)**0.5
+                        if dist < 0.08:
+                            is_duplicate = True
+                            break
+                    
+                    if is_duplicate:
+                        continue  # Skip duplicate tracking of the same hand
+                    
+                    detected_wrists.append(wrist)
+
                     # Draw skeletal outline on the display frame
                     self.tracker.draw_landmarks(frame, hand_landmarks)
 
