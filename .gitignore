@@ -152,3 +152,7 @@ Thumbs.db
 .gemini/
 antigravity-ide/
 *.log
+
+# MS Word Homework Documents
+*.docx
+~$*.docx
