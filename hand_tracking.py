@@ -75,37 +75,17 @@ class Thumb(Finger):
         thumb_ip = landmarks[self.ip_idx]
         thumb_mcp = landmarks[self.mcp_idx]
         pinky_mcp = landmarks[self.pinky_mcp_idx]
-        index_mcp = landmarks[5]  # Index MCP joint (knuckle)
 
-        # 1. Horizontal check based on hand orientation
         # Determine hand orientation (whether thumb is on the left or right side)
         # by comparing Pinky MCP x-coordinate with Thumb MCP x-coordinate.
         if pinky_mcp.x > thumb_mcp.x:
             # Thumb is on the left side of the hand relative to the camera view
             # (e.g., Right hand palm facing the camera).
-            horizontal_open = thumb_tip.x < thumb_ip.x
+            return thumb_tip.x < thumb_ip.x
         else:
             # Thumb is on the right side of the hand relative to the camera view
             # (e.g., Left hand palm facing the camera).
-            horizontal_open = thumb_tip.x > thumb_ip.x
-
-        # 2. Distance-based check (highly robust for thumbs-up and rotation-invariant)
-        # Compare distance between Thumb Tip and Index MCP with Thumb IP and Index MCP.
-        # If the thumb is extended (open), the tip is further from the index base than the IP joint.
-        # If the thumb is folded (closed), the tip is tucked closer to the index base than the IP joint.
-        dist_tip_index = ((thumb_tip.x - index_mcp.x)**2 + 
-                          (thumb_tip.y - index_mcp.y)**2 + 
-                          (thumb_tip.z - index_mcp.z)**2)**0.5
-                          
-        dist_ip_index = ((thumb_ip.x - index_mcp.x)**2 + 
-                         (thumb_ip.y - index_mcp.y)**2 + 
-                         (thumb_ip.z - index_mcp.z)**2)**0.5
-
-        # We add a 1.02 multiplier tolerance to prevent noise when the thumb is relaxed/folded.
-        distance_open = dist_tip_index > (dist_ip_index * 1.02)
-
-        # The thumb is open if either the horizontal coordinate check OR the robust distance check is True
-        return horizontal_open or distance_open
+            return thumb_tip.x > thumb_ip.x
 
 
 # ==========================================
